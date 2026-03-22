@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary — Unity Exam Prep</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="page-content">
+
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-text">
+        <h1>📚 Glossary</h1>
+        <p>Quick-reference definitions for every key Unity term on the exam.</p>
+      </div>
+      <input type="text" class="search-input" id="glossary-search" placeholder="Search terms…" style="min-width:220px;">
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="container">
+      <span class="filter-label">Topic</span>
+      <div class="filter-pills" id="topic-filters"></div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="container">
+
+      <div class="glossary-alpha" id="alpha-nav"></div>
+
+      <div id="glossary-list"></div>
+
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <div class="empty-state-icon">🔍</div>
+        <h3>No terms found</h3>
+        <p>Try a different search term or filter.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/nav.js"></script>
+<script src="js/glossary.js"></script>
+</body>
+</html>
