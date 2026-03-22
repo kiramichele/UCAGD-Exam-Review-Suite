@@ -1,7 +1,0 @@
-[build]
-  publish = "unity-exam-prep"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
