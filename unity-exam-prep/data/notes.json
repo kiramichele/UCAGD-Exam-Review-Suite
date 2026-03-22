@@ -1,0 +1,284 @@
+[
+  {
+    "id": "interface",
+    "title": "Unity Interface & Workflow",
+    "icon": "🖥️",
+    "color": "interface",
+    "intro": "The Unity Editor is your primary workspace. Mastering the layout, shortcuts, and core concepts like Prefabs and Tags is foundational to every other exam domain.",
+    "sections": [
+      {
+        "heading": "The Five Core Windows",
+        "content": "<p>Unity's default layout consists of five main windows you'll use constantly:</p><ul><li><strong>Scene View</strong> — the interactive 3D/2D viewport for building levels. Use W/E/R for Move/Rotate/Scale, F to focus on a selection.</li><li><strong>Game View</strong> — what the player camera sees. Only active during Play mode, but you can preview it anytime. Never edit the scene while in Play mode unless you copy values out first.</li><li><strong>Hierarchy</strong> — lists every GameObject in the open scene as a parent-child tree. Drag objects onto each other to parent them.</li><li><strong>Inspector</strong> — displays all components and properties of the selected object or asset. This is where you configure everything.</li><li><strong>Project Window</strong> — file browser for your Assets folder. All importable files (scripts, textures, audio, prefabs) live here.</li></ul><div class='info-box'>A sixth key window: the <strong>Console</strong> — shows Debug.Log output, warnings, and errors. Clear it often during testing to catch new messages.</div>"
+      },
+      {
+        "heading": "GameObjects and Components",
+        "content": "<p>Everything visible (and many invisible things) in a Unity scene is a <strong>GameObject</strong>. GameObjects themselves do nothing — they are just containers for <strong>Components</strong>, which provide all behavior and appearance.</p><ul><li>Every GameObject has a <strong>Transform</strong> component — position, rotation, scale — which cannot be removed.</li><li>Components are added via the Inspector (Add Component button) or dragged from the Project window.</li><li>Scripts are components too — any <code>MonoBehaviour</code> subclass can be added as a component.</li><li><strong>Parent-child relationships</strong> — a child inherits the parent's transform changes. Moving the parent moves all children with it. The child's transform shows its <em>local</em> offset from the parent.</li></ul>"
+      },
+      {
+        "heading": "Prefabs",
+        "content": "<p>Prefabs are one of Unity's most important features. A Prefab stores a <strong>fully configured GameObject</strong> (with all its components, child objects, and settings) as a reusable asset in the Project window.</p><ul><li>Create a Prefab by dragging a GameObject from the Hierarchy into the Project window.</li><li>All instances placed in scenes are <strong>linked</strong> to the Prefab. Changes to the Prefab propagate to all instances.</li><li>Individual instances can have <strong>Prefab Overrides</strong> — local changes that don't affect other instances or the original.</li><li>Use <strong>Prefab Variants</strong> to create specialized versions of a Prefab that inherit from a parent Prefab.</li></ul><div class='tip-box'>⚡ Exam tip: Prefabs are the answer to 'how do you reuse a configured object in multiple scenes' — always choose Prefab over Template, Prototype, or Script.</div>"
+      },
+      {
+        "heading": "Tags and Layers",
+        "content": "<p><strong>Tags</strong> are string labels assigned to GameObjects. Use them to identify objects in scripts with <code>gameObject.CompareTag(\"Enemy\")</code> or <code>GameObject.FindWithTag(\"Player\")</code>.</p><p><strong>Layers</strong> are integer indices (0-31) used for two main purposes:</p><ul><li><strong>Camera Culling Mask</strong> — Camera only renders objects on selected layers</li><li><strong>Physics Layer Collision Matrix</strong> — control which layers collide with which others</li></ul><p>Both Tags and Layers are configured in Project Settings → Tags and Layers, or via the dropdowns in the Inspector.</p>"
+      }
+    ],
+    "examTips": [
+      "Know all Transform tool shortcuts: Q/W/E/R/T/Y",
+      "Understand what Prefab Overrides are and when they apply",
+      "F = focus on selected object in Scene view",
+      "The Hierarchy shows scene objects; Project shows file assets",
+      "Tags are for identification; Layers are for rendering and physics filtering"
+    ]
+  },
+  {
+    "id": "scripting",
+    "title": "C# Scripting in Unity",
+    "icon": "📝",
+    "color": "scripting",
+    "intro": "Scripting is the largest exam domain (~14%). You need to know the MonoBehaviour lifecycle, C# fundamentals, common patterns, and Unity-specific APIs cold.",
+    "sections": [
+      {
+        "heading": "MonoBehaviour Lifecycle",
+        "content": "<p>Every script that inherits from <code>MonoBehaviour</code> has access to lifecycle methods called by Unity's engine. The complete order is:</p><ol><li><strong>Awake()</strong> — called once when the script loads, even if disabled. Use for self-initialization that doesn't depend on other objects.</li><li><strong>OnEnable()</strong> — called every time the script is enabled.</li><li><strong>Start()</strong> — called once before the first Update(), only if enabled. Use for initialization that may reference other objects (they've all had Awake by now).</li><li><strong>FixedUpdate()</strong> — fixed physics timestep (default 50×/sec). Use for physics forces.</li><li><strong>Update()</strong> — every frame. Use for input, gameplay logic.</li><li><strong>LateUpdate()</strong> — every frame, after all Updates. Use for camera logic.</li><li><strong>OnDisable()</strong> — when the script is disabled or the object is destroyed.</li><li><strong>OnDestroy()</strong> — just before the object is destroyed.</li></ol><div class='tip-box'>⚡ Memorize this order cold — it's heavily tested. Key rule: Awake → Start order enables you to safely reference other objects in Start that initialized themselves in Awake.</div>"
+      },
+      {
+        "heading": "Essential APIs",
+        "content": "<p>These are the Unity C# APIs you'll use in nearly every project:</p><ul><li><code>GetComponent&lt;T&gt;()</code> — get a component on this GameObject. Cache results in Awake.</li><li><code>Instantiate(prefab, pos, rot)</code> — create a GameObject from a prefab at runtime.</li><li><code>Destroy(obj, delay)</code> — remove a GameObject or component.</li><li><code>transform.Translate(v)</code> — move relative to local or world space.</li><li><code>Time.deltaTime</code> — seconds since last frame. Always multiply movement by this.</li><li><code>Input.GetAxis(\"Horizontal\")</code> — float -1 to 1 for smooth analog input.</li><li><code>Input.GetKeyDown(KeyCode.Space)</code> — true only on the frame the key is pressed.</li><li><code>Debug.Log(message)</code> — print to the Console.</li></ul>"
+      },
+      {
+        "heading": "Coroutines",
+        "content": "<p>Coroutines are methods that can <strong>pause mid-execution</strong> and resume later, using the <code>yield return</code> keyword. They run on the main thread but don't block it.</p><p>Common yield instructions:</p><ul><li><code>yield return null</code> — pause for one frame</li><li><code>yield return new WaitForSeconds(2f)</code> — pause for 2 seconds</li><li><code>yield return new WaitForFixedUpdate()</code> — pause until next FixedUpdate</li><li><code>yield return new WaitUntil(() => condition)</code> — pause until condition is true</li></ul><p>Starting and stopping: <code>StartCoroutine(MyMethod())</code>, <code>StopCoroutine(\"MyMethod\")</code>.</p><div class='info-box'>Coroutines are <em>not</em> multithreading — they run cooperatively on the main thread. Use them for timed sequences, delays, and staged loading — not for CPU-heavy parallel work.</div>"
+      },
+      {
+        "heading": "Useful Attributes",
+        "content": "<p>C# attributes in Unity modify how scripts and fields behave in the Editor:</p><ul><li><code>[SerializeField]</code> — expose a private field in the Inspector without making it public.</li><li><code>[HideInInspector]</code> — hide a public field from the Inspector (still serialized).</li><li><code>[Header(\"Movement\")]</code> — add a bold header label in the Inspector to organize fields.</li><li><code>[Tooltip(\"Speed in m/s\")]</code> — show a tooltip when hovering the field in the Inspector.</li><li><code>[Range(0, 10)]</code> — display the field as a slider in the Inspector.</li><li><code>[RequireComponent(typeof(Rigidbody))]</code> — auto-add a required component and prevent its removal.</li><li><code>[DisallowMultipleComponent]</code> — prevents this component from being added more than once.</li></ul>"
+      }
+    ],
+    "examTips": [
+      "Awake vs Start: use Awake for self-init, Start for cross-object references",
+      "Always multiply movement/speed by Time.deltaTime in Update()",
+      "FixedUpdate() only — never poll Input in FixedUpdate",
+      "[SerializeField] is preferred over public for Inspector exposure",
+      "GetComponent returns null if the component doesn't exist — always check",
+      "Coroutines use IEnumerator return type, yield return to pause"
+    ]
+  },
+  {
+    "id": "physics",
+    "title": "Physics System",
+    "icon": "⚙️",
+    "color": "physics",
+    "intro": "Unity has separate physics engines for 3D (PhysX) and 2D (Box2D). You need to know Rigidbodies, Colliders, triggers vs. collisions, raycasting, and forces.",
+    "sections": [
+      {
+        "heading": "Rigidbody vs Collider",
+        "content": "<p>These two components work together but serve different roles:</p><ul><li><strong>Collider</strong> — defines the physical <em>shape</em> of an object for collision detection. Can exist without a Rigidbody (static collider). Types: BoxCollider, SphereCollider, CapsuleCollider, MeshCollider.</li><li><strong>Rigidbody</strong> — hands transform control to the physics engine. Adds mass, drag, gravity, velocity. Receives forces. Without it, a collider is Static.</li></ul><p><strong>Object types by component combination:</strong></p><ul><li><strong>Static</strong> — Collider only, no Rigidbody. Immovable (walls, floors). Moving static colliders at runtime is expensive.</li><li><strong>Rigidbody (Dynamic)</strong> — Rigidbody + Collider. Fully physics-simulated.</li><li><strong>Kinematic</strong> — Rigidbody (Is Kinematic = true) + Collider. Moved by script (transform or MovePosition), not forces. Can affect other Rigidbodies.</li><li><strong>Trigger</strong> — Collider with Is Trigger = true. Detects overlaps, no physical response.</li></ul>"
+      },
+      {
+        "heading": "Collision Callbacks",
+        "content": "<p>Unity calls these methods automatically on scripts when collision events occur:</p><p><strong>Physical Collisions (both colliders NOT triggers):</strong></p><ul><li><code>OnCollisionEnter(Collision col)</code> — first frame of contact</li><li><code>OnCollisionStay(Collision col)</code> — every frame while in contact</li><li><code>OnCollisionExit(Collision col)</code> — first frame after contact ends</li></ul><p><strong>Trigger Overlaps (at least one Is Trigger):</strong></p><ul><li><code>OnTriggerEnter(Collider other)</code></li><li><code>OnTriggerStay(Collider other)</code></li><li><code>OnTriggerExit(Collider other)</code></li></ul><div class='tip-box'>⚡ For collision callbacks to fire, at least one object in the pair must have a <strong>non-kinematic Rigidbody</strong>. Two static colliders touching generate no callbacks.</div>"
+      },
+      {
+        "heading": "Forces and ForceMode",
+        "content": "<p>Apply forces to a Rigidbody using <code>rb.AddForce(vector, ForceMode)</code>:</p><ul><li><code>ForceMode.Force</code> (default) — continuous force, affected by mass. <em>N = kg·m/s²</em></li><li><code>ForceMode.Impulse</code> — instant velocity change, affected by mass. <em>Use for jumps, explosions</em></li><li><code>ForceMode.Acceleration</code> — continuous force, ignores mass.</li><li><code>ForceMode.VelocityChange</code> — instant velocity change, ignores mass.</li></ul><p>Other force-related properties: <code>rb.velocity</code>, <code>rb.angularVelocity</code>, <code>rb.drag</code>, <code>rb.angularDrag</code>, <code>rb.mass</code>.</p><p><strong>Setting velocity directly</strong>: <code>rb.velocity = new Vector3(x, y, z)</code> — OK for character jumps, but avoid mixing with AddForce.</p>"
+      },
+      {
+        "heading": "Raycasting",
+        "content": "<p>Raycasting lets you detect objects in a line without physical contact:</p><pre><code>RaycastHit hit;\nif (Physics.Raycast(origin, direction, out hit, maxDistance))\n{\n    Debug.Log(\"Hit: \" + hit.collider.name);\n    Debug.DrawLine(origin, hit.point, Color.red);\n}</code></pre><p>Useful overloads:</p><ul><li><code>Physics.Raycast(ray, out hit)</code> — using a Ray struct (e.g., <code>Camera.main.ScreenPointToRay(Input.mousePosition)</code>)</li><li><code>Physics.RaycastAll(origin, dir)</code> — returns all hits, not just the first</li><li><code>Physics.SphereCast()</code>, <code>BoxCast()</code> — shaped casts</li></ul><p>Use a <strong>LayerMask</strong> to filter which layers the ray checks against — much faster than hitting everything.</p>"
+      }
+    ],
+    "examTips": [
+      "Rigidbody = physics simulation. Collider = shape. Need both for dynamic physics.",
+      "For callbacks to fire: at least one non-kinematic Rigidbody in the pair",
+      "Trigger vs Collision: trigger = Is Trigger checked = no physical push",
+      "FixedUpdate is where you add forces — never in Update()",
+      "ForceMode.Impulse = instant, mass-aware. VelocityChange = instant, massless.",
+      "RaycastHit struct holds point, normal, distance, collider, transform"
+    ]
+  },
+  {
+    "id": "animation",
+    "title": "Animation System",
+    "icon": "🎬",
+    "color": "animation",
+    "intro": "Unity's Mecanim animation system is built around the Animator Controller state machine. You need to know clips, states, transitions, blend trees, parameters, and events.",
+    "sections": [
+      {
+        "heading": "Animation Clips and the Animator",
+        "content": "<p>An <strong>Animation Clip</strong> is a recorded timeline of keyframe data — position, rotation, scale, color changes, script variable changes — anything Unity can animate. Clips are assets in the Project window.</p><p>The <strong>Animator</strong> component (on a GameObject) drives animation playback. It requires an <strong>Animator Controller</strong> asset in its Controller field. The Animator reads the Controller's state machine and plays the appropriate clips.</p><p>The <strong>Animation window</strong> (Window → Animation) lets you record new clips and edit keyframes directly on GameObjects in the scene.</p>"
+      },
+      {
+        "heading": "Animator Controller State Machine",
+        "content": "<p>The Animator Controller is a visual state machine:</p><ul><li><strong>States</strong> — each state plays one (or a blend of) animation clip(s). The orange state is the default entry state.</li><li><strong>Transitions</strong> — arrows between states with conditions that trigger the switch. Set Has Exit Time to auto-transition when the clip ends, or use parameters for code-triggered transitions.</li><li><strong>Parameters</strong> — variables that scripts can set to drive transitions: <code>Float</code>, <code>Int</code>, <code>Bool</code>, <code>Trigger</code>.</li></ul><p>In code: <code>anim.SetFloat(\"Speed\", speed);</code>, <code>anim.SetBool(\"IsGrounded\", true);</code>, <code>anim.SetTrigger(\"Jump\");</code></p><div class='info-box'>A Trigger parameter automatically resets to false after a transition consumes it — unlike Bool, which stays set until you change it.</div>"
+      },
+      {
+        "heading": "Blend Trees",
+        "content": "<p>A Blend Tree is a special Animator state that <strong>blends between multiple clips</strong> based on one or two float parameters:</p><ul><li><strong>1D Blend Tree</strong> — one float parameter (e.g., Speed). Clips at threshold values blend smoothly as the parameter changes.</li><li><strong>2D Blend Tree</strong> — two float parameters (e.g., X velocity and Z velocity). Clips are placed in 2D space and blended based on the 2D parameter vector.</li></ul><p>Common use: idle (0) → walk (0.5) → run (1) all in one Blend Tree controlled by a Speed float. Much cleaner than 3 separate states with transitions between them.</p>"
+      },
+      {
+        "heading": "Animation Layers and IK",
+        "content": "<p><strong>Animation Layers</strong> let you run multiple state machines simultaneously on different body parts. Example: a base layer for locomotion and an upper-body layer for aiming or reloading.</p><ul><li>Each layer has a weight (0-1) and a mask (Avatar Mask) defining which bones it controls.</li><li>Blending modes: Override (replaces lower layers) or Additive (adds on top).</li></ul><p><strong>Inverse Kinematics (IK)</strong> — automatically poses limbs to reach a target position. Requires 'IK Pass' enabled on the layer. Implement in <code>OnAnimatorIK(int layerIndex)</code>.</p><p><strong>Animation Events</strong> — markers on clips that call a named method on the GameObject's scripts. Set via the Animation window or in the Inspector's clip preview.</p>"
+      }
+    ],
+    "examTips": [
+      "Animator component + Animator Controller asset: both required",
+      "Triggers auto-reset after use. Bools stay set until you change them.",
+      "Blend Trees = smooth blending via float parameter (locomotion is the classic example)",
+      "Animation Events call a method by name — method must exist on a script on the same GameObject",
+      "Humanoid Avatar enables animation retargeting between different character models"
+    ]
+  },
+  {
+    "id": "audio",
+    "title": "Audio System",
+    "icon": "🔊",
+    "color": "audio",
+    "intro": "Unity's audio system is built around three core components: AudioClip (data), AudioSource (emitter), and AudioListener (receiver). Know these well plus the Audio Mixer.",
+    "sections": [
+      {
+        "heading": "Core Components",
+        "content": "<p>The audio pipeline has three players:</p><ul><li><strong>AudioClip</strong> — the audio data asset (imported .wav, .mp3, .ogg). Configured via Inspector: Load Type, Compression Format, 3D/2D.</li><li><strong>AudioSource</strong> — attached to GameObjects to emit sound. Key properties: AudioClip, Volume, Pitch, Loop, Play On Awake, Spatial Blend, Min/Max Distance.</li><li><strong>AudioListener</strong> — the 'ear' of the scene. Exactly one must exist — usually on the Main Camera. Audio is spatialized relative to the listener's position and orientation.</li></ul><p>In code: <code>audioSource.Play()</code>, <code>audioSource.Stop()</code>, <code>audioSource.PlayOneShot(clip)</code>.</p>"
+      },
+      {
+        "heading": "3D Spatial Audio",
+        "content": "<p>Unity simulates 3D audio using the <strong>Spatial Blend</strong> property on AudioSource:</p><ul><li><strong>0 = fully 2D</strong> — flat, uniform volume regardless of distance or direction. Good for UI, music, narration.</li><li><strong>1 = fully 3D</strong> — volume attenuates with distance; panning based on direction relative to listener. Good for in-world SFX.</li></ul><p>3D audio is configured with rolloff curves: Linear, Logarithmic, or Custom. The <strong>Min Distance</strong> defines where max volume starts; <strong>Max Distance</strong> is where the sound fades to zero.</p><p><strong>Audio Reverb Zones</strong> add environment-based reverb (cave, hall, underwater) for objects within a defined radius.</p>"
+      },
+      {
+        "heading": "Audio Mixer",
+        "content": "<p>The <strong>Audio Mixer</strong> (Window → Audio → Audio Mixer) is a digital mixing board for your game's audio:</p><ul><li><strong>Groups</strong> — create named groups (Master, Music, SFX, Voice). Set each AudioSource's Output to the appropriate group.</li><li><strong>Effects</strong> — add DSP effects to groups: Reverb, Equalizer, Compressor, Echo. Effects applied to a group affect all sources routed through it.</li><li><strong>Snapshots</strong> — saved mixer states you can blend between at runtime. Use for dynamic transitions: underwater → above water, combat music → calm exploration.</li></ul><p>Set group volume from code: <code>mixer.SetFloat(\"MasterVolume\", value)</code> where the exposed parameter name matches. Note: Audio Mixer volumes are in decibels (dB) — use <code>Mathf.Log10(sliderValue) * 20</code> to convert from a 0-1 slider.</p>"
+      }
+    ],
+    "examTips": [
+      "AudioListener = one per scene, on Main Camera. AudioSource = many.",
+      "PlayOneShot stacks sound; Play() interrupts itself.",
+      "PlayClipAtPoint is perfect for audio on destroyed objects.",
+      "Spatial Blend: 0 = 2D, 1 = 3D. Not to be confused with volume.",
+      "Audio Mixer volumes are in dB — use the log formula for UI sliders"
+    ]
+  },
+  {
+    "id": "lighting",
+    "title": "Lighting & Rendering",
+    "icon": "💡",
+    "color": "lighting",
+    "intro": "Lighting defines the visual quality of your game. Understand light types, Materials, Shaders, baking/GI, and the differences between real-time and pre-computed lighting.",
+    "sections": [
+      {
+        "heading": "Light Types",
+        "content": "<p>Unity's four built-in lights (in the Built-in Render Pipeline):</p><ul><li><strong>Directional Light</strong> — casts parallel rays across the entire scene. Position doesn't matter, only rotation. One Directional Light = one shadow map for the whole scene. Simulates sun/moon.</li><li><strong>Point Light</strong> — radiates from a single point in all directions. Has a configurable range. Simulates light bulbs, torches, fires.</li><li><strong>Spot Light</strong> — cone-shaped light. Configurable angle and range. Simulates flashlights, spotlights.</li><li><strong>Area Light</strong> — rectangular soft light. <strong>Baked only</strong> in Built-in RP (available in URP/HDRP at runtime). Great for windows, studio lighting.</li></ul><p>Each light has a <strong>Light Mode</strong>: Realtime (every frame), Baked (pre-computed), or Mixed (both — direct lighting realtime, indirect baked).</p>"
+      },
+      {
+        "heading": "Materials and Shaders",
+        "content": "<p>Every rendered surface uses a <strong>Material</strong>, which is an instance of a <strong>Shader</strong>:</p><ul><li>The <strong>Shader</strong> is a GPU program that calculates pixel color based on lights, textures, and properties. Shaders can be written in HLSL/ShaderLab or created with Shader Graph.</li><li>The <strong>Material</strong> stores the property values fed into the Shader: Albedo (base color) texture, Metallic map, Smoothness, Normal map, Emission, etc.</li></ul><p>Key Built-in shaders:</p><ul><li><strong>Standard</strong> — PBR shader, metallic workflow. Default for 3D objects.</li><li><strong>Unlit/Color</strong>, <strong>Unlit/Texture</strong> — not affected by lights at all. Good for UI, flat art, VFX.</li><li><strong>Sprites/Default</strong> — used by Sprite Renderers in 2D.</li></ul><p><strong>PBR properties:</strong> Metallic (0 = dielectric, 1 = metal), Smoothness (0 = rough/matte, 1 = mirror-like).</p>"
+      },
+      {
+        "heading": "Global Illumination and Lightmapping",
+        "content": "<p><strong>Global Illumination (GI)</strong> simulates indirect light — light that has bounced off surfaces. It creates realistic soft shadows and color bleeding.</p><ul><li><strong>Baked GI</strong> — pre-computed with Unity's Lightmapper (Progressive CPU/GPU). Results stored in Lightmap textures on static objects. Zero runtime cost, but can't change dynamically.</li><li>Objects must be marked <strong>Static → Contribute GI</strong> to receive baked lighting.</li><li><strong>Light Probes</strong> — sample points in the scene that store baked lighting for dynamic objects (characters, moving props) that can't use lightmaps.</li><li><strong>Reflection Probes</strong> — capture 360° environment reflections at a point, used for accurate reflections on metallic/glossy surfaces.</li></ul><p>Lightmapping is configured in <strong>Window → Rendering → Lighting</strong>. Click 'Generate Lighting' to bake.</p>"
+      }
+    ],
+    "examTips": [
+      "Directional Light = sun (no position effect). Point = bulb (range limited).",
+      "Area Light is bake-only in Built-in RP — remember this for exam questions.",
+      "Baked lighting = no runtime cost but no dynamic updates.",
+      "Objects must be Static → Contribute GI to be included in lightmap baking.",
+      "Light Probes are for dynamic objects that can't use lightmaps.",
+      "Standard Shader = PBR. Unlit = ignores lighting entirely."
+    ]
+  },
+  {
+    "id": "ui",
+    "title": "UI Systems",
+    "icon": "🖱️",
+    "color": "ui",
+    "intro": "Unity UI (uGUI) is Canvas-based and covers everything from HUDs and menus to in-world UI. You need to know Canvas render modes, RectTransform, EventSystem, and scripting UI.",
+    "sections": [
+      {
+        "heading": "Canvas and Render Modes",
+        "content": "<p>All UI elements must be children of a <strong>Canvas</strong> GameObject. The Canvas determines how UI is rendered:</p><ul><li><strong>Screen Space - Overlay</strong> — renders directly on the screen surface, always on top of everything. The default. No camera dependency.</li><li><strong>Screen Space - Camera</strong> — rendered by a specified camera at a configurable distance. Allows 3D effects between UI and world objects. Requires a camera reference.</li><li><strong>World Space</strong> — the Canvas exists in 3D world space with a real transform. Occludes/is occluded by 3D objects. Used for in-world panels, enemy health bars, interactive screens.</li></ul><p>The <strong>Canvas Scaler</strong> component controls how UI scales across resolutions. Use 'Scale With Screen Size' with a reference resolution (e.g., 1920×1080).</p>"
+      },
+      {
+        "heading": "RectTransform and Anchors",
+        "content": "<p>UI elements use a <strong>RectTransform</strong> instead of a regular Transform. Key properties:</p><ul><li><strong>Anchors</strong> — four normalized points (0-1) on the parent that this element attaches to. Min/Max define a normalized rect on the parent.</li><li><strong>Anchor Presets</strong> — hold Shift/Alt while clicking a preset to also set pivot and position. The preset grid in the Inspector top-left is the fastest way to set up anchors.</li><li><strong>Pivot</strong> — the point the element rotates and scales around (0,0 = bottom-left, 0.5,0.5 = center, 1,1 = top-right).</li><li><strong>Stretch anchors</strong> — set Min=(0,0) and Max=(1,1) to stretch the element to fill its parent. Add Left/Right/Top/Bottom offsets for padding.</li></ul><div class='tip-box'>⚡ Most resolution issues come from incorrect anchors. Elements anchored to one corner stay near that corner on all screen sizes — not always what you want!</div>"
+      },
+      {
+        "heading": "Core UI Components",
+        "content": "<p>Key UI components to know:</p><ul><li><strong>Button</strong> — clickable element. OnClick() UnityEvent in Inspector or add listeners in code: <code>button.onClick.AddListener(MyMethod)</code></li><li><strong>Image</strong> — displays a Sprite. Raycast Target makes it block/pass pointer events.</li><li><strong>TextMeshProUGUI</strong> (TMP) — high-quality text rendering. Change text: <code>tmpText.text = \"Score: \" + score;</code></li><li><strong>Slider</strong> — ranged float value. <code>slider.onValueChanged.AddListener(OnSliderChanged)</code></li><li><strong>Toggle</strong> — checkbox. <code>toggle.isOn</code></li><li><strong>InputField (TMP)</strong> — text entry. <code>inputField.text</code></li><li><strong>Canvas Group</strong> — controls alpha, interactability, and raycast for all children at once. Useful for fading whole panels in/out.</li></ul>"
+      },
+      {
+        "heading": "EventSystem and Input",
+        "content": "<p>The <strong>EventSystem</strong> is a hidden but critical component in every Unity UI scene. It:</p><ul><li>Processes pointer events (click, hover, drag) for all Canvas elements</li><li>Handles keyboard/controller navigation for selectable UI elements</li><li>Manages which element is currently selected/focused</li></ul><p>Without an EventSystem (or if it's disabled), <strong>no UI input will work</strong>. Unity creates one automatically when you create a Canvas.</p><p>For custom pointer interaction on 3D objects (World Space UI), implement the relevant interfaces: <code>IPointerClickHandler</code>, <code>IPointerEnterHandler</code>, etc.</p>"
+      }
+    ],
+    "examTips": [
+      "World Space Canvas is a real 3D object; Overlay always renders on top.",
+      "EventSystem is required for all UI input — check if it's missing when UI doesn't respond.",
+      "Anchors control scaling behavior — stretch anchors = fill parent.",
+      "Raycast Target on an Image blocks pointer events even if it's transparent.",
+      "TextMeshPro is preferred over legacy Text for all new projects.",
+      "Canvas Scaler → Scale With Screen Size for resolution-independent UI."
+    ]
+  },
+  {
+    "id": "2d",
+    "title": "2D Game Development",
+    "icon": "🎮",
+    "color": "2d",
+    "intro": "Unity's 2D tools include Sprite Renderer, Rigidbody2D, the Tilemap system, and the 2D Physics engine (Box2D). Key differences from 3D are important to know.",
+    "sections": [
+      {
+        "heading": "Sprites and Rendering",
+        "content": "<p><strong>Sprites</strong> are 2D graphics — imported textures set to <em>Texture Type: Sprite (2D and UI)</em> in the Inspector. The <strong>Sprite Editor</strong> lets you slice a sprite sheet into individual sprites.</p><p>The <strong>Sprite Renderer</strong> component displays a sprite in the scene. Key properties:</p><ul><li><strong>Sprite</strong> — the sprite asset to display.</li><li><strong>Color</strong> — tint the sprite (white = original color).</li><li><strong>Flip X/Y</strong> — mirror the sprite without scaling by -1.</li><li><strong>Sorting Layer</strong> and <strong>Order in Layer</strong> — control draw order.</li><li><strong>Draw Mode</strong> — Simple, Sliced (9-slice), or Tiled.</li></ul><p><strong>Sorting Layers</strong> (named layers, ordered by list) take priority. Within a layer, <strong>Order in Layer</strong> (integer) controls front-to-back order.</p>"
+      },
+      {
+        "heading": "2D Physics",
+        "content": "<p>Unity uses <strong>Box2D</strong> for 2D physics — a separate engine from 3D PhysX. Key 2D components:</p><ul><li><strong>Rigidbody2D</strong> — 2D physics body. Has Body Type: Dynamic, Kinematic, or Static. <code>Gravity Scale</code> multiplies global gravity.</li><li><strong>Collider2D variants</strong>: BoxCollider2D, CircleCollider2D, CapsuleCollider2D, PolygonCollider2D, EdgeCollider2D, CompositeCollider2D.</li><li><strong>PhysicsMaterial2D</strong> — sets friction and bounciness for 2D colliders.</li></ul><p>2D collision callbacks work the same as 3D: <code>OnCollisionEnter2D(Collision2D col)</code>, <code>OnTriggerEnter2D(Collider2D other)</code>. Note the <strong>2D suffix</strong> — 3D and 2D physics callbacks are separate methods.</p><p>2D force API: <code>rb2d.AddForce(Vector2 force)</code>, <code>rb2d.velocity</code>, <code>rb2d.MovePosition()</code>.</p>"
+      },
+      {
+        "heading": "Tilemap System",
+        "content": "<p>The Tilemap system is Unity's solution for efficient 2D tile-based levels:</p><ul><li><strong>Grid</strong> — parent GameObject defining the cell size and layout.</li><li><strong>Tilemap</strong> — child of Grid. Holds the tile data (which tile at which grid coordinate).</li><li><strong>Tilemap Renderer</strong> — renders the Tilemap visually.</li><li><strong>Tile Palette</strong> (Window → 2D → Tile Palette) — the painting tool for placing tiles.</li><li><strong>Tile assets</strong> — each unique tile is a <code>.asset</code> file referencing a sprite. Rule Tiles auto-select sprites based on neighboring tiles (great for autotiling).</li></ul><p>For physics on tilemaps: add <strong>Tilemap Collider 2D</strong> and optionally a <strong>Composite Collider 2D</strong> (which merges individual tile colliders for massive performance gains).</p>"
+      }
+    ],
+    "examTips": [
+      "2D physics uses Box2D; 3D uses PhysX — separate systems, separate components",
+      "Use the 2D suffix for callbacks: OnCollisionEnter2D, OnTriggerEnter2D",
+      "Sprite Atlas reduces draw calls by batching sprites from the same texture",
+      "Sorting Layer first, then Order in Layer for draw order control",
+      "Composite Collider 2D merges Tilemap tile colliders — always use it for large tilemaps",
+      "Rigidbody2D Gravity Scale = 0 makes an object weightless"
+    ]
+  },
+  {
+    "id": "workflow",
+    "title": "Project Management & Build",
+    "icon": "🛠️",
+    "color": "workflow",
+    "intro": "The exam covers the project pipeline from setup and organization to building and deployment. Know the Package Manager, Build Settings, Profiler, and version control best practices.",
+    "sections": [
+      {
+        "heading": "Project Organization",
+        "content": "<p>Good project structure prevents issues as projects grow:</p><ul><li>Organize the Assets folder by type: <code>Scripts/</code>, <code>Prefabs/</code>, <code>Sprites/</code>, <code>Audio/</code>, <code>Scenes/</code>, <code>Materials/</code>.</li><li>Use descriptive, consistent naming (e.g., <code>Player_Idle_Clip</code>, <code>EnemySpawner_Prefab</code>).</li><li>Avoid spaces in file/folder names — can cause issues on some platforms.</li></ul><p><strong>Version Control (Git):</strong></p><ul><li>Track the <code>Assets/</code> and <code>ProjectSettings/</code> folders.</li><li>Ignore <code>Library/</code>, <code>Temp/</code>, <code>Builds/</code>, <code>obj/</code> — these are auto-generated.</li><li>Always commit <code>.meta</code> files — they store GUIDs and import settings. Losing them breaks all asset references.</li></ul>"
+      },
+      {
+        "heading": "Package Manager and Asset Store",
+        "content": "<p>The <strong>Package Manager</strong> (Window → Package Manager) is the central hub for extending Unity:</p><ul><li><strong>Unity Registry</strong> — official Unity packages (Input System, TextMeshPro, Cinemachine, URP, ProBuilder, etc.).</li><li><strong>My Assets</strong> — your Asset Store purchases.</li><li><strong>In Project</strong> — packages currently installed.</li><li><strong>Git URL / Local</strong> — install packages from a GitHub URL or local disk path.</li></ul><p>Key packages to know: <em>TextMeshPro</em>, <em>Input System</em>, <em>Universal Render Pipeline (URP)</em>, <em>Cinemachine</em>, <em>2D Sprite</em>.</p>"
+      },
+      {
+        "heading": "Build Settings and Deployment",
+        "content": "<p><strong>File → Build Settings</strong> is the gateway to deploying your game:</p><ul><li><strong>Scenes in Build</strong> — drag scenes from the Project window. The scene at index 0 is the startup scene.</li><li><strong>Platform</strong> — select target: PC (Windows/Mac/Linux), WebGL, Android, iOS, etc. Install platform modules via Unity Hub.</li><li><strong>Player Settings</strong> — accessed from Build Settings. Configure: Company/Product Name, app icon, resolution, bundle ID, rendering settings, quality settings per platform.</li></ul><p>After building, Unity outputs a standalone executable (PC), .apk/.aab (Android), or web build folder (WebGL) depending on the target platform.</p>"
+      },
+      {
+        "heading": "Performance and Debugging Tools",
+        "content": "<p><strong>Profiler</strong> (Window → Analysis → Profiler):</p><ul><li>Records CPU, GPU, Memory, Rendering, Physics, and Audio data per frame.</li><li>Use the <em>CPU Usage</em> module to find expensive function calls.</li><li>Profile a Device Build for accurate mobile performance data.</li></ul><p><strong>Frame Debugger</strong> (Window → Analysis → Frame Debugger):</p><ul><li>Steps through individual draw calls for a single frame — helps identify overdraw, incorrect rendering order, and shader issues.</li></ul><p><strong>Debug tools in code:</strong></p><ul><li><code>Debug.Log()</code>, <code>Debug.LogWarning()</code>, <code>Debug.LogError()</code></li><li><code>Debug.DrawLine(start, end, color)</code> — visible only in Scene view</li><li><code>Debug.DrawRay(origin, dir, color)</code></li><li><code>Debug.Break()</code> — pauses Play mode</li></ul>"
+      }
+    ],
+    "examTips": [
+      "Build Settings: scenes index 0 = startup scene",
+      ".meta files must be committed to version control — they hold GUIDs",
+      "Profiler = performance data. Frame Debugger = draw calls per frame.",
+      "Player Settings is accessed via Build Settings, not Project Settings directly",
+      "Unity ignores Library/ and Temp/ — never commit them to Git",
+      "Know the key packages: TMP, Input System, URP, Cinemachine"
+    ]
+  }
+]

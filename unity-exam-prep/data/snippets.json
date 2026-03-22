@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "title": "Frame-Rate Independent Movement",
+    "description": "Move a GameObject with keyboard input, scaled by Time.deltaTime for consistent speed at any frame rate.",
+    "topic": "C# Scripting",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\n\npublic class PlayerMovement : MonoBehaviour\n{\n    [SerializeField] private float speed = 5f;\n\n    void Update()\n    {\n        float h = Input.GetAxis(\"Horizontal\"); // -1 to 1\n        float v = Input.GetAxis(\"Vertical\");   // -1 to 1\n\n        // Time.deltaTime makes movement frame-rate independent\n        Vector3 direction = new Vector3(h, 0f, v) * speed * Time.deltaTime;\n        transform.Translate(direction, Space.World);\n    }\n}"
+  },
+  {
+    "id": 2,
+    "title": "Rigidbody Movement + Jump",
+    "description": "Physics-based movement using Rigidbody forces. Forces in FixedUpdate, input detection in Update.",
+    "topic": "C# Scripting",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\n\n[RequireComponent(typeof(Rigidbody))]\npublic class PhysicsPlayer : MonoBehaviour\n{\n    [SerializeField] private float moveSpeed = 8f;\n    [SerializeField] private float jumpForce = 5f;\n\n    private Rigidbody rb;\n    private bool jumpRequested = false;\n\n    void Awake()\n    {\n        rb = GetComponent<Rigidbody>();\n        rb.freezeRotation = true; // Prevent physics tipping\n    }\n\n    // Read input in Update (frame-accurate)\n    void Update()\n    {\n        if (Input.GetKeyDown(KeyCode.Space))\n            jumpRequested = true;\n    }\n\n    // Apply forces in FixedUpdate (physics step)\n    void FixedUpdate()\n    {\n        float h = Input.GetAxis(\"Horizontal\");\n        float v = Input.GetAxis(\"Vertical\");\n        Vector3 move = new Vector3(h, 0f, v) * moveSpeed;\n        rb.velocity = new Vector3(move.x, rb.velocity.y, move.z);\n\n        if (jumpRequested)\n        {\n            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);\n            jumpRequested = false;\n        }\n    }\n}"
+  },
+  {
+    "id": 3,
+    "title": "Collect Items with Trigger",
+    "description": "Detect item pickup using a trigger collider. Checks tag to filter what can be picked up.",
+    "topic": "Physics",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\n\npublic class ItemPickup : MonoBehaviour\n{\n    // Called when another collider enters this trigger\n    private void OnTriggerEnter(Collider other)\n    {\n        // Use CompareTag instead of == for performance\n        if (other.CompareTag(\"Player\"))\n        {\n            // Optional: add to player inventory, score, etc.\n            Debug.Log(\"Picked up: \" + gameObject.name);\n            Destroy(gameObject); // Remove the item from the scene\n        }\n    }\n}"
+  },
+  {
+    "id": 4,
+    "title": "Score Counter with UI",
+    "description": "Track score with a static-style manager and update a TextMeshPro UI element.",
+    "topic": "UI Systems",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\nusing TMPro;  // TextMeshPro namespace\n\npublic class ScoreManager : MonoBehaviour\n{\n    public static ScoreManager Instance; // Simple singleton\n\n    [SerializeField] private TextMeshProUGUI scoreText;\n    private int score = 0;\n\n    void Awake()\n    {\n        // Singleton pattern\n        if (Instance == null) Instance = this;\n        else Destroy(gameObject);\n    }\n\n    public void AddScore(int points)\n    {\n        score += points;\n        UpdateUI();\n    }\n\n    private void UpdateUI()\n    {\n        scoreText.text = \"Score: \" + score;\n    }\n}\n\n// --- In another script, call: ---\n// ScoreManager.Instance.AddScore(10);"
+  },
+  {
+    "id": 5,
+    "title": "Coroutine: Delayed Action",
+    "description": "Use a coroutine to wait a specified number of seconds, then execute logic (e.g., delayed spawn or respawn).",
+    "topic": "C# Scripting",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\nusing System.Collections;  // Required for IEnumerator\n\npublic class DelayedSpawner : MonoBehaviour\n{\n    [SerializeField] private GameObject prefabToSpawn;\n    [SerializeField] private float spawnDelay = 3f;\n\n    void Start()\n    {\n        StartCoroutine(SpawnAfterDelay());\n    }\n\n    IEnumerator SpawnAfterDelay()\n    {\n        Debug.Log(\"Waiting \" + spawnDelay + \" seconds...\");\n        yield return new WaitForSeconds(spawnDelay); // Pause here\n\n        // This code runs after the delay\n        Instantiate(prefabToSpawn, transform.position, Quaternion.identity);\n        Debug.Log(\"Spawned!\");\n    }\n}"
+  },
+  {
+    "id": 6,
+    "title": "Camera Follow (Smooth)",
+    "description": "Smooth camera follow using Vector3.Lerp in LateUpdate, with a configurable offset.",
+    "topic": "C# Scripting",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\n\npublic class CameraFollow : MonoBehaviour\n{\n    [SerializeField] private Transform target;\n    [SerializeField] private Vector3 offset = new Vector3(0f, 5f, -10f);\n    [SerializeField] private float smoothSpeed = 5f;\n\n    // LateUpdate runs after all Update() calls,\n    // so the camera reacts to the player's FINAL position each frame\n    void LateUpdate()\n    {\n        if (target == null) return;\n\n        Vector3 desiredPosition = target.position + offset;\n\n        // Lerp smoothly moves toward the desired position\n        transform.position = Vector3.Lerp(\n            transform.position,\n            desiredPosition,\n            smoothSpeed * Time.deltaTime\n        );\n\n        transform.LookAt(target); // Always face the target\n    }\n}"
+  },
+  {
+    "id": 7,
+    "title": "Raycast — Click to Interact",
+    "description": "Cast a ray from the camera through the mouse cursor and interact with hit objects.",
+    "topic": "Physics",
+    "difficulty": "Intermediate",
+    "code": "using UnityEngine;\n\npublic class ClickInteract : MonoBehaviour\n{\n    [SerializeField] private float maxDistance = 50f;\n    [SerializeField] private LayerMask interactableLayers;\n\n    void Update()\n    {\n        if (Input.GetMouseButtonDown(0)) // Left click\n        {\n            // Create a ray from the camera through the mouse position\n            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);\n            RaycastHit hit;\n\n            if (Physics.Raycast(ray, out hit, maxDistance, interactableLayers))\n            {\n                Debug.Log(\"Hit: \" + hit.collider.name);\n                Debug.DrawLine(ray.origin, hit.point, Color.green, 1f);\n\n                // Try to call an Interact method on the hit object\n                IInteractable interactable = hit.collider.GetComponent<IInteractable>();\n                interactable?.Interact();\n            }\n        }\n    }\n}\n\n// Define an interface for interactable objects\npublic interface IInteractable\n{\n    void Interact();\n}"
+  },
+  {
+    "id": 8,
+    "title": "Health System",
+    "description": "Reusable health component with Take Damage, Heal, and an OnDeath event.",
+    "topic": "C# Scripting",
+    "difficulty": "Intermediate",
+    "code": "using UnityEngine;\nusing System;\n\npublic class Health : MonoBehaviour\n{\n    [SerializeField] private float maxHealth = 100f;\n    private float currentHealth;\n\n    public event Action OnDeath;           // Fired when health reaches 0\n    public event Action<float> OnChanged;  // Fired with normalized 0-1 value\n\n    public float NormalizedHealth => currentHealth / maxHealth;\n\n    void Awake()\n    {\n        currentHealth = maxHealth;\n    }\n\n    public void TakeDamage(float amount)\n    {\n        if (currentHealth <= 0) return;  // Already dead\n\n        currentHealth = Mathf.Max(0, currentHealth - amount);\n        OnChanged?.Invoke(NormalizedHealth);\n\n        if (currentHealth <= 0)\n            OnDeath?.Invoke();\n    }\n\n    public void Heal(float amount)\n    {\n        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);\n        OnChanged?.Invoke(NormalizedHealth);\n    }\n}"
+  },
+  {
+    "id": 9,
+    "title": "Scene Loading",
+    "description": "Load a new scene synchronously or asynchronously. Includes the required using directive.",
+    "topic": "C# Scripting",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\nusing UnityEngine.SceneManagement;  // Required for scene loading\n\npublic class SceneLoader : MonoBehaviour\n{\n    // --- Synchronous (simple, causes a brief freeze) ---\n    public void LoadSceneByName(string sceneName)\n    {\n        SceneManager.LoadScene(sceneName);\n    }\n\n    public void LoadSceneByIndex(int buildIndex)\n    {\n        SceneManager.LoadScene(buildIndex);\n    }\n\n    public void ReloadCurrentScene()\n    {\n        int current = SceneManager.GetActiveScene().buildIndex;\n        SceneManager.LoadScene(current);\n    }\n\n    // --- Async (shows loading progress, no freeze) ---\n    public void LoadAsync(string sceneName)\n    {\n        StartCoroutine(LoadAsyncCoroutine(sceneName));\n    }\n\n    System.Collections.IEnumerator LoadAsyncCoroutine(string sceneName)\n    {\n        AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);\n        while (!op.isDone)\n        {\n            float progress = op.progress; // 0-0.9 during load, 1 when done\n            Debug.Log(\"Loading: \" + (int)(progress * 100) + \"%\");\n            yield return null;\n        }\n    }\n}"
+  },
+  {
+    "id": 10,
+    "title": "Play Audio from Script",
+    "description": "Different ways to play audio in Unity: Play, PlayOneShot, and PlayClipAtPoint.",
+    "topic": "Audio",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\n\npublic class AudioExamples : MonoBehaviour\n{\n    [SerializeField] private AudioSource audioSource;\n    [SerializeField] private AudioClip jumpClip;\n    [SerializeField] private AudioClip explosionClip;\n\n    // Play() — plays the AudioSource's assigned clip\n    // Stops and restarts if already playing\n    public void PlayJump()\n    {\n        audioSource.clip = jumpClip;\n        audioSource.Play();\n    }\n\n    // PlayOneShot() — plays a clip without interrupting current audio\n    // Stacks multiple sounds, great for rapid-fire SFX\n    public void PlayEffect(AudioClip sfx)\n    {\n        audioSource.PlayOneShot(sfx);\n    }\n\n    // PlayClipAtPoint() — creates a temporary AudioSource at a world position\n    // Perfect for sounds on objects that will be destroyed\n    public void PlayExplosionAtPoint(Vector3 worldPos)\n    {\n        AudioSource.PlayClipAtPoint(explosionClip, worldPos);\n        // No AudioSource component needed — fully self-contained\n    }\n}"
+  },
+  {
+    "id": 11,
+    "title": "Animator Control from Script",
+    "description": "Set Animator parameters (Bool, Float, Trigger) to drive transitions and Blend Trees.",
+    "topic": "Animation",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\n\n[RequireComponent(typeof(Animator))]\npublic class AnimatorController : MonoBehaviour\n{\n    private Animator anim;\n    private Rigidbody rb;\n\n    // Hash string params for performance (avoids string lookup every frame)\n    private static readonly int SpeedHash    = Animator.StringToHash(\"Speed\");\n    private static readonly int IsGroundedHash = Animator.StringToHash(\"IsGrounded\");\n    private static readonly int JumpHash     = Animator.StringToHash(\"Jump\");\n\n    void Awake()\n    {\n        anim = GetComponent<Animator>();\n        rb   = GetComponent<Rigidbody>();\n    }\n\n    void Update()\n    {\n        // Float — drives a Blend Tree for locomotion\n        float speed = new Vector3(rb.velocity.x, 0, rb.velocity.z).magnitude;\n        anim.SetFloat(SpeedHash, speed);\n\n        // Bool — toggle a state\n        bool grounded = IsGrounded();\n        anim.SetBool(IsGroundedHash, grounded);\n\n        // Trigger — fires once and auto-resets\n        if (Input.GetKeyDown(KeyCode.Space) && grounded)\n            anim.SetTrigger(JumpHash);\n    }\n\n    bool IsGrounded()\n    {\n        return Physics.Raycast(transform.position, Vector3.down, 1.1f);\n    }\n}"
+  },
+  {
+    "id": 12,
+    "title": "Singleton Pattern",
+    "description": "A thread-safe MonoBehaviour Singleton. Use for managers (GameManager, AudioManager) that need global access.",
+    "topic": "C# Scripting",
+    "difficulty": "Intermediate",
+    "code": "using UnityEngine;\n\n/// <summary>\n/// Generic Singleton base class for MonoBehaviours.\n/// Usage: public class GameManager : Singleton<GameManager> { }\n/// Access: GameManager.Instance.DoSomething();\n/// </summary>\npublic class Singleton<T> : MonoBehaviour where T : MonoBehaviour\n{\n    private static T _instance;\n\n    public static T Instance\n    {\n        get\n        {\n            if (_instance == null)\n                Debug.LogError(typeof(T) + \" instance not found in scene!\");\n            return _instance;\n        }\n    }\n\n    protected virtual void Awake()\n    {\n        if (_instance != null && _instance != this)\n        {\n            Destroy(gameObject); // Destroy duplicate\n            return;\n        }\n        _instance = this as T;\n        DontDestroyOnLoad(gameObject); // Persist across scenes\n    }\n}"
+  },
+  {
+    "id": 13,
+    "title": "2D Character Controller",
+    "description": "2D platformer movement with jump and ground check using Rigidbody2D and Physics2D.Raycast.",
+    "topic": "2D Development",
+    "difficulty": "Intermediate",
+    "code": "using UnityEngine;\n\n[RequireComponent(typeof(Rigidbody2D))]\npublic class PlatformerController : MonoBehaviour\n{\n    [SerializeField] private float moveSpeed = 6f;\n    [SerializeField] private float jumpForce = 10f;\n    [SerializeField] private LayerMask groundLayer;\n    [SerializeField] private Transform groundCheck;\n\n    private Rigidbody2D rb;\n    private bool isGrounded;\n\n    void Awake() => rb = GetComponent<Rigidbody2D>();\n\n    void Update()\n    {\n        // Ground check — cast a small circle downward\n        isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.1f, groundLayer);\n\n        // Jump (input read in Update)\n        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)\n            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);\n    }\n\n    void FixedUpdate()\n    {\n        // Horizontal movement (applied in FixedUpdate)\n        float h = Input.GetAxis(\"Horizontal\");\n        rb.velocity = new Vector2(h * moveSpeed, rb.velocity.y);\n    }\n}"
+  },
+  {
+    "id": 14,
+    "title": "UI Button via Script",
+    "description": "Connect a Button's OnClick event in code, and toggle a panel's visibility.",
+    "topic": "UI Systems",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\nusing UnityEngine.UI;\n\npublic class MenuController : MonoBehaviour\n{\n    [SerializeField] private Button settingsButton;\n    [SerializeField] private Button closeButton;\n    [SerializeField] private GameObject settingsPanel;\n\n    void Start()\n    {\n        // Wire up button clicks in code\n        settingsButton.onClick.AddListener(OpenSettings);\n        closeButton.onClick.AddListener(CloseSettings);\n\n        settingsPanel.SetActive(false); // Hidden by default\n    }\n\n    void OpenSettings()  => settingsPanel.SetActive(true);\n    void CloseSettings() => settingsPanel.SetActive(false);\n\n    void OnDestroy()\n    {\n        // Good practice: remove listeners to prevent memory leaks\n        settingsButton.onClick.RemoveListener(OpenSettings);\n        closeButton.onClick.RemoveListener(CloseSettings);\n    }\n}"
+  },
+  {
+    "id": 15,
+    "title": "Timer Countdown",
+    "description": "A countdown timer that fires an event when it reaches zero. Updates a TMP text label each second.",
+    "topic": "C# Scripting",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\nusing TMPro;\nusing System;\n\npublic class CountdownTimer : MonoBehaviour\n{\n    [SerializeField] private float startTime = 60f;\n    [SerializeField] private TextMeshProUGUI timerText;\n\n    public event Action OnTimerExpired;\n\n    private float timeRemaining;\n    private bool isRunning = false;\n\n    public void StartTimer() \n    { \n        timeRemaining = startTime; \n        isRunning = true; \n    }\n\n    void Update()\n    {\n        if (!isRunning) return;\n\n        timeRemaining -= Time.deltaTime;\n\n        if (timeRemaining <= 0)\n        {\n            timeRemaining = 0;\n            isRunning = false;\n            OnTimerExpired?.Invoke();\n        }\n\n        // Format as MM:SS\n        int minutes = Mathf.FloorToInt(timeRemaining / 60);\n        int seconds = Mathf.FloorToInt(timeRemaining % 60);\n        timerText.text = string.Format(\"{0:00}:{1:00}\", minutes, seconds);\n    }\n}"
+  },
+  {
+    "id": 16,
+    "title": "Save and Load with PlayerPrefs",
+    "description": "Save and load simple game data (settings, high scores) that persists between game sessions.",
+    "topic": "Project & Workflow",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\n\npublic class SaveSystem : MonoBehaviour\n{\n    // Key constants prevent typo bugs\n    private const string HIGH_SCORE_KEY = \"HighScore\";\n    private const string VOLUME_KEY     = \"MasterVolume\";\n    private const string PLAYER_NAME_KEY = \"PlayerName\";\n\n    // Save data\n    public void SaveHighScore(int score)\n    {\n        PlayerPrefs.SetInt(HIGH_SCORE_KEY, score);\n        PlayerPrefs.Save(); // Force write to disk (optional — auto-saves on quit)\n    }\n\n    public void SaveVolume(float volume)\n    {\n        PlayerPrefs.SetFloat(VOLUME_KEY, volume);\n    }\n\n    public void SavePlayerName(string name)\n    {\n        PlayerPrefs.SetString(PLAYER_NAME_KEY, name);\n    }\n\n    // Load data (with default values if not found)\n    public int LoadHighScore()  => PlayerPrefs.GetInt(HIGH_SCORE_KEY, 0);\n    public float LoadVolume()   => PlayerPrefs.GetFloat(VOLUME_KEY, 1f);\n    public string LoadName()    => PlayerPrefs.GetString(PLAYER_NAME_KEY, \"Player\");\n\n    // Delete all saved data\n    public void DeleteAllSaveData() => PlayerPrefs.DeleteAll();\n}"
+  },
+  {
+    "id": 17,
+    "title": "Spawn Objects on a Timer",
+    "description": "Coroutine-based spawner that creates instances of a prefab at regular intervals at random positions.",
+    "topic": "C# Scripting",
+    "difficulty": "Intermediate",
+    "code": "using UnityEngine;\nusing System.Collections;\n\npublic class EnemySpawner : MonoBehaviour\n{\n    [SerializeField] private GameObject enemyPrefab;\n    [SerializeField] private float spawnInterval = 2f;\n    [SerializeField] private int maxEnemies = 10;\n    [SerializeField] private float spawnRadius = 10f;\n\n    private int activeEnemies = 0;\n\n    void Start()\n    {\n        StartCoroutine(SpawnRoutine());\n    }\n\n    IEnumerator SpawnRoutine()\n    {\n        while (true) // Runs indefinitely\n        {\n            yield return new WaitForSeconds(spawnInterval);\n\n            if (activeEnemies < maxEnemies)\n            {\n                SpawnEnemy();\n            }\n        }\n    }\n\n    void SpawnEnemy()\n    {\n        // Random position within a circle around the spawner\n        Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;\n        Vector3 spawnPos = transform.position + new Vector3(randomCircle.x, 0, randomCircle.y);\n\n        Instantiate(enemyPrefab, spawnPos, Quaternion.identity);\n        activeEnemies++;\n    }\n\n    // Call this when an enemy dies\n    public void OnEnemyDied() => activeEnemies--;\n}"
+  },
+  {
+    "id": 18,
+    "title": "LookAt Enemy AI",
+    "description": "Simple AI that follows and faces the player within a detection range using Vector3 distance.",
+    "topic": "C# Scripting",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\n\npublic class SimpleEnemyAI : MonoBehaviour\n{\n    [SerializeField] private Transform player;\n    [SerializeField] private float detectionRange = 10f;\n    [SerializeField] private float moveSpeed = 3f;\n    [SerializeField] private float stopDistance = 1.5f;\n\n    void Update()\n    {\n        if (player == null) return;\n\n        float distToPlayer = Vector3.Distance(transform.position, player.position);\n\n        if (distToPlayer <= detectionRange)\n        {\n            // Always face the player (Y-axis only)\n            Vector3 dirToPlayer = player.position - transform.position;\n            dirToPlayer.y = 0; // Keep enemy upright\n            if (dirToPlayer != Vector3.zero)\n                transform.rotation = Quaternion.LookRotation(dirToPlayer);\n\n            // Move toward player if not close enough\n            if (distToPlayer > stopDistance)\n                transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);\n        }\n    }\n}"
+  },
+  {
+    "id": 19,
+    "title": "Object Pool (Basic)",
+    "description": "Reuse GameObjects instead of Instantiate/Destroy every frame — great for bullets, particles, enemies.",
+    "topic": "C# Scripting",
+    "difficulty": "Advanced",
+    "code": "using UnityEngine;\nusing System.Collections.Generic;\n\npublic class ObjectPool : MonoBehaviour\n{\n    [SerializeField] private GameObject prefab;\n    [SerializeField] private int poolSize = 20;\n\n    private Queue<GameObject> pool = new Queue<GameObject>();\n\n    void Awake()\n    {\n        // Pre-warm: create all objects upfront, deactivated\n        for (int i = 0; i < poolSize; i++)\n        {\n            GameObject obj = Instantiate(prefab, transform);\n            obj.SetActive(false);\n            pool.Enqueue(obj);\n        }\n    }\n\n    // Get an object from the pool\n    public GameObject Get(Vector3 position, Quaternion rotation)\n    {\n        if (pool.Count == 0)\n        {\n            // Pool is exhausted — grow it\n            GameObject extra = Instantiate(prefab, transform);\n            pool.Enqueue(extra);\n        }\n\n        GameObject obj = pool.Dequeue();\n        obj.transform.SetPositionAndRotation(position, rotation);\n        obj.SetActive(true);\n        return obj;\n    }\n\n    // Return an object to the pool\n    public void Return(GameObject obj)\n    {\n        obj.SetActive(false);\n        pool.Enqueue(obj);\n    }\n}"
+  },
+  {
+    "id": 20,
+    "title": "Health Bar UI Slider",
+    "description": "Connect a Slider UI element to a Health component to display a health bar that updates in real time.",
+    "topic": "UI Systems",
+    "difficulty": "Beginner",
+    "code": "using UnityEngine;\nusing UnityEngine.UI;\n\npublic class HealthBarUI : MonoBehaviour\n{\n    [SerializeField] private Slider healthSlider;\n    [SerializeField] private Health healthComponent; // From the Health snippet\n\n    void Start()\n    {\n        // Initialize slider\n        healthSlider.minValue = 0f;\n        healthSlider.maxValue = 1f;\n        healthSlider.value = 1f;\n\n        // Subscribe to health change events\n        if (healthComponent != null)\n            healthComponent.OnChanged += UpdateBar;\n    }\n\n    void UpdateBar(float normalizedHealth)\n    {\n        // Normalized health = 0 to 1\n        healthSlider.value = normalizedHealth;\n    }\n\n    void OnDestroy()\n    {\n        // Unsubscribe to prevent memory leaks\n        if (healthComponent != null)\n            healthComponent.OnChanged -= UpdateBar;\n    }\n}"
+  }
+]
