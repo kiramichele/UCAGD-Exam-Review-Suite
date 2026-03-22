@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards — Unity Exam Prep</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="page-content">
+
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-text">
+        <h1>🃏 Flashcards</h1>
+        <p>Click a card to flip it. Use the arrows to navigate, or shuffle for a random order.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="container">
+      <span class="filter-label">Topic</span>
+      <div class="filter-pills" id="topic-filters"></div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="container">
+      <div class="flashcard-stage" id="flashcard-stage">
+
+        <div class="flashcard-counter">
+          <span class="counter-text" id="card-counter">1 / 72</span>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progress-fill" style="width:1%"></div>
+          </div>
+          <span id="topic-badge-display"></span>
+        </div>
+
+        <div class="flashcard-scene" id="flashcard-scene">
+          <div class="flashcard-inner">
+            <div class="flashcard-face front">
+              <span class="flashcard-face-label">Question</span>
+              <h2 id="card-front-text">Loading…</h2>
+              <span class="flashcard-hint">Click to reveal answer</span>
+            </div>
+            <div class="flashcard-face back">
+              <span class="flashcard-face-label">Answer</span>
+              <h2 id="card-back-text"></h2>
+              <span class="flashcard-hint">Click to flip back</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flashcard-controls">
+          <button class="btn btn-secondary" id="btn-prev">← Prev</button>
+          <button class="btn btn-ghost" id="btn-shuffle">⇄ Shuffle</button>
+          <button class="btn btn-ghost" id="btn-restart">↺ Restart</button>
+          <button class="btn btn-secondary" id="btn-next">Next →</button>
+        </div>
+
+        <div id="empty-state" class="empty-state" style="display:none;">
+          <div class="empty-state-icon">🔍</div>
+          <h3>No cards match this filter</h3>
+          <p>Try selecting a different topic or All.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/nav.js"></script>
+<script src="js/flashcards.js"></script>
+</body>
+</html>
